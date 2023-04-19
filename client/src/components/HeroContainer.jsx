@@ -9,7 +9,7 @@ const HeroContainer = (props) => {
 
   // Default images to load on initial render
   useEffect(() => {
-    fetch('http://localhost:8000/api/shoes/1')
+    fetch('http://localhost:3000/api/shoes/1')
       .then((res) => res.json())
       .then((data) => {
         props.setFocusedImage(data[0].image);

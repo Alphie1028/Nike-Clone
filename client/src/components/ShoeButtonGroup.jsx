@@ -5,7 +5,7 @@ const ShoeButtonGroup = (props) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch('http://localhost:8000/api/shoeid/' + props.shoeid);
+      const response = await fetch('http://localhost:3000/api/shoeid/' + props.shoeid);
       const data = await response.json();
       setPicArray(data.map((shoe) => shoe.image));
     };
@@ -25,7 +25,7 @@ const ShoeButtonGroup = (props) => {
     } else {
       props.setMemberAccess(false);
     }
-    fetch(`http://localhost:8000/api/shoes/${id}`)
+    fetch(`http://localhost:3000/api/shoes/${id}`)
       .then((res) => res.json())
       .then((data) => {
         props.setFocusedImage(data[0].image);

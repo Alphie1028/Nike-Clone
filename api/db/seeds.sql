@@ -1,19 +1,4 @@
-//console.log("Made it inside seed.js");
-
-const { Pool } = require('pg');
-const dbConn = require('./dbConn');
-const pool = dbConn.getPool();
-
-function runSeeder(pool, callback) {
-    pool.connect((err, client, done) => {
-        if (err) {
-            console.log("Failed to connect to the database");
-            console.log(err);
-            return done();
-        }
-
-        //Run SEED SQL:
-        pool.query(`INSERT INTO shoes (name, shoeid, price, gender, image, image_array, description, color_description, style, size_array) VALUES 
+INSERT INTO shoes (name, shoeid, price, gender, image, image_array, description, color_description, style, size_array) VALUES 
             ('Air Jordan 1 Mid', 1, '$125', 'Men''s Shoes', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/ea3a034a-351d-4d5e-9e39-6ebe24eebd23/air-jordan-1-mid-mens-shoes-b3js2D.png', ARRAY ['https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/ea3a034a-351d-4d5e-9e39-6ebe24eebd23/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b2a37016-a8c8-4700-9215-7814ef2a99a5/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/d35fd628-8d5f-441c-9151-fb39b053b2ed/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/f3c594b4-5e8a-4327-87c4-4d55aa3aa69e/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/3587121c-5ff8-45b0-90b2-2cef3cb78b61/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/c2bd1f9d-2bfb-4f4d-9f92-23bc7eadc95e/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/376a8a9e-7bcf-496a-bb03-1f8ae6148036/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/5bd93a59-5883-4ebe-94fa-38a541acb25c/air-jordan-1-mid-mens-shoes-b3js2D.png'], 'Inspired by the original AJ1, this mid-top edition maintains the iconic look you love while choice colors and crisp leather give it a distinct identity.', 'Shown: Lucky Green/White/Black', 'Style: DQ8426-301', ARRAY ['M 7 / W 8.5','M 7.5 / W 9','M 8 / W 9.5','M 8.5 / W 10','M 9 / W 10.5','M 9.5 / W 11','M 10 / W 11.5','M 10.5 / W 12','M 11 / W 12.5','M 11.5 / W 13','M 12 / W 13.5','M 12.5 / W 14','M 13 / W 14.5','M 14 / W 15.5','M 15 / W 16.5','M 16 / W 17.5','M 17 / W 18.5','M 18 / W 19.5']),
             ('Air Jordan 1 Mid', 1, '$125', 'Men''s Shoes', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/2fb8a3f3-85d5-4be1-b869-93659d64df11/air-jordan-1-mid-mens-shoes-b3js2D.png', ARRAY ['https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/2fb8a3f3-85d5-4be1-b869-93659d64df11/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/9ee89514-25c2-4671-a4b4-20be0e66e254/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/31452549-a890-42a2-be28-0c2d9c4ea570/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/169469a7-30eb-49f3-8d7b-ccd09e650c37/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/57a172a7-2dab-4275-9870-9d0a3db6b462/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/133c235c-19bd-422a-8793-7698266573bb/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/268ce333-336a-4acc-b8d0-29716614728f/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/25236a5e-a97f-460a-8673-2bc2f4e8b85f/air-jordan-1-mid-mens-shoes-b3js2D.png'], 'Inspired by the original AJ1, this mid-top edition maintains the iconic look you love while choice colors and crisp leather give it a distinct identity.', 'Shown: Palomino/Wild Berry/White','Style: DQ8426-215', ARRAY ['M 7 / W 8.5','M 7.5 / W 9','M 8 / W 9.5','M 8.5 / W 10','M 9 / W 10.5','M 9.5 / W 11','M 10 / W 11.5','M 10.5 / W 12','M 11 / W 12.5','M 11.5 / W 13','M 12 / W 13.5','M 12.5 / W 14','M 13 / W 14.5','M 14 / W 15.5','M 15 / W 16.5','M 16 / W 17.5','M 17 / W 18.5','M 18 / W 19.5']),
             ('Air Jordan 1 Mid', 1, '$125', 'Men''s Shoes', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/8061baec-449e-433b-89b3-8234dde499bd/air-jordan-1-mid-mens-shoes-b3js2D.png', ARRAY ['https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/8061baec-449e-433b-89b3-8234dde499bd/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/e658cd91-2af3-4cf9-bc97-6cdaf10aa9a7/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/5fd0369e-33c0-4135-840c-3465007cebf6/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/729afd42-8d2c-4ca5-8904-e37570e52f90/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/43a9bc05-2ea3-4001-87bb-1c1da0492ed9/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/eacfe3ef-e64e-4190-9727-b9dd4befef68/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/ab3cb47c-159b-4678-8039-8b9d201ab9bd/air-jordan-1-mid-mens-shoes-b3js2D.png', 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/1b300bc7-588f-44b2-b598-1f70983443c0/air-jordan-1-mid-mens-shoes-b3js2D.png'], 'You ready for your moment in the sun? Every time the AJ1 gets a remake you get the classic sneaker in new colors and textures for a fresh look with a familiar feel. Premium materials and accents give modern expression to an all-time favorite. Get out there and shine.', 'Shown: Game Royal/Phantom/White/Rush Orange', 'Style: FD1029-400', ARRAY ['M 3.5 / W 5','M 4 / W 5.5','M 4.5 / W 6','M 5 / W 6.5','M 5.5 / W 7','M 6 / W 7.5','M 6.5 / W 8','M 7 / W 8.5','M 7.5 / W 9','M 8 / W 9.5','M 8.5 / W 10','M 9 / W 10.5','M 9.5 / W 11','M 10 / W 11.5','M 10.5 / W 12','M 11 / W 12.5','M 11.5 / W 13','M 12 / W 13.5','M 12.5 / W 14','M 13 / W 14.5','M 14 / W 15.5','M 15 / W 16.5','M 16 / W 17.5','M 17 / W 18.5']),
@@ -32,13 +17,9 @@ function runSeeder(pool, callback) {
             ('Jordan 6 Rings', 10, '$144.97', 'Men''s Shoes', 'https://static.nike.com/a/images/t_PDP_864_v1,f_auto,q_auto:eco/719321f3-9576-4e9e-a773-3e7e490c0bce/jordan-6-rings-mens-shoes-2VAD3Y.png', NULL, NULL, NULL, NULL, NULL),
             ('Jordan Access',11,'$110.00','Men''s Shoe','https://static.nike.com/a/images/t_PDP_864_v1,f_auto,q_auto:eco/1da9a11f-cc52-4b7a-ae05-29bb2a11318d/jordan-access-mens-shoe-5Jm9bC.png', NULL, NULL, NULL, NULL, NULL),
             ('Nike Air Force 1 ''07',12,'$110.00','Men''s Shoe','https://static.nike.com/a/images/t_PDP_864_v1,f_auto,q_auto:eco/4f37fca8-6bce-43e7-ad07-f57ae3c13142/air-force-1-07-mens-shoes-5QFp5Z.png', NULL, NULL, NULL, NULL, NULL),
-            ('Air Jordan 1 Low G',13,'$140.00','Golf Shoes','https://static.nike.com/a/images/t_PDP_864_v1,f_auto,q_auto:eco/4203faa2-8da6-4416-a479-89d2c1f259f6/air-jordan-1-low-g-golf-shoes-jChrQ3.png', NULL, NULL, NULL, NULL, NULL)`,
-            (err) => {
-                if (err) {
-                    console.log("INSERT DATA FAILED ON shoes TABLE", err)
-                } else {
-                    console.log("INSERT DATA INTO shoes SUCCESSFUL")
-                    pool.query(`INSERT INTO review (review_id, title, stars, user_name, date_created, summary) VALUES
+            ('Air Jordan 1 Low G',13,'$140.00','Golf Shoes','https://static.nike.com/a/images/t_PDP_864_v1,f_auto,q_auto:eco/4203faa2-8da6-4416-a479-89d2c1f259f6/air-jordan-1-low-g-golf-shoes-jChrQ3.png', NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO review (review_id, title, stars, user_name, date_created, summary) VALUES
                     (1, '' ,5, 'Palash544714572', 'Apr 04, 2023', 'I just got my pair 30 minutes ago. They feel great and comfortable. The colorway goes really great with grey hoodies and jeans. In my opinion, this is a fire pair that should be a cop. Plus I have no idea why this is not sold out.'),
                     (1, 'They are dope' ,4, 'Layla322586335', 'Mar 28, 2023', 'I really like these shoes! But they are super narrow. Sometimes they can get uncomfortable but it doesn''t really bother me. They are also pretty durable, but they do crease very easily! Overall the shoes are very nice!'),
                     (1, 'Great shoe' ,5,'Dalove180', 'Mar 20, 2023', '[This review was collected as part of a promotion.] Brought this for my child birthday and she loves it. Product received for free, or reviewed as part of a sweepstakes giveaway. #teamnike'),
@@ -59,24 +40,5 @@ function runSeeder(pool, callback) {
                     (6, 'Great shoe' ,4,'reed25011835', 'Apr 07, 2023', 'They are comfortable. I got some good comments on them👍🏻'),
                     (7, '' ,5, 'Palash544714572', 'Apr 04, 2023', 'I just got my pair 30 minutes ago. They feel great and comfortable. The colorway goes really great with grey hoodies and jeans. In my opinion, this is a fire pair that should be a cop. Plus I have no idea why this is not sold out.'),
                     (7, 'They are dope' ,4, 'Layla322586335', 'Mar 28, 2023', 'I really like these shoes! But they are super narrow. Sometimes they can get uncomfortable but it doesn''t really bother me. They are also pretty durable, but they do crease very easily! Overall the shoes are very nice!'),
-                    (7, 'Great shoe' ,5,'Dalove180', 'Mar 20, 2023', '[This review was collected as part of a promotion.] Brought this for my child birthday and she loves it. Product received for free, or reviewed as part of a sweepstakes giveaway. #teamnike')`,
-                    (err) => {
-                        if (err) {
-                            console.log("INSERT DATA FAILED ON review", err)
-                        } else {
-                            console.log("INSERT review DATA SUCCESSFUL")
-                            done();
-                            callback();
-                        }
-                    })
-                }
-            }
-        )
-    })
-}
-
-runSeeder(pool, () => {
-    //close connection:
-    pool.end();
-});
-
+                    (7, 'Great shoe' ,5,'Dalove180', 'Mar 20, 2023', '[This review was collected as part of a promotion.] Brought this for my child birthday and she loves it. Product received for free, or reviewed as part of a sweepstakes giveaway. #teamnike');
+              

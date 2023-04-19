@@ -1,22 +1,21 @@
-'use strict';
-
-const dotenv = require('dotenv');
-dotenv.config();
-console.log(process.env);
-
-//SETUP DEPENDECIES:
 const express = require('express');
-const cors = require('cors');
 const { Pool } = require('pg');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
-const port = 8000;
 app.use(express.json());
 app.use(cors());
-const { listenerCount } = require('stream');
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-const dbConn = require('./dbConn');
-const pool = dbConn.getPool();
+const pool = new Pool({
+    user: 'postgres',
+    host: 'db',
+    database: 'mydb',
+    password: 'password',
+    port: 5432
+});
 
 app.get('/api/shoes', (req, res, next) => {
     pool.query('SELECT * FROM shoes', (err, result) => {
@@ -135,11 +134,6 @@ app.post('/api/review/', (req, res) => {
 //DELETE ROUTES (x2) - NOT NECESSARY
 //PATCH ROUTES (x2) - NOT NECESSARY
 
-app.use(function(err, req, res, next){
-    res.status(404).send("ERROR 404 ('MIDDLEWARE') - THERE WAS A PROBLEM", err);
-});
-
-
-app.listen(port, function(){
-    console.log(`Service is running, listening on ${port}`);
-});
+app.listen(3000, () => {
+    console.log('Server listening on port 3000')
+})

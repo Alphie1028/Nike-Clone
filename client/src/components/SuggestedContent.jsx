@@ -8,7 +8,7 @@ const SuggestedContent = () => {
   const [suggestedContent, setSuggestedContent] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/shoes/')
+    fetch('http://localhost:3000/api/shoes/')
             .then(res => res.json())
             .then((data) => {
               setSuggestedContent(data.filter(item => item.shoeid > 1));
