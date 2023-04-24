@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const Redis = require("ioredis");
 
 const app = express();
 app.use(express.json());
@@ -17,123 +18,131 @@ const pool = new Pool({
     port: 5432
 });
 
-app.get('/api/shoes', (req, res, next) => {
-    pool.query('SELECT * FROM shoes', (err, result) => {
-        if (err){
-            res.status(404).send(err)
+const redisClient = new Redis({
+    host: 'redis',
+    port: 6379,
+});
+
+async function cacheAllData() {
+    try {
+        const client = await pool.connect();
+        const { rows } = await client.query('SELECT * FROM shoes');
+        rows.forEach(shoe => {
+            redisClient.set(`shoes:${shoe.id}`, JSON.stringify(shoe), 'EX', 60);
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function cacheAllReviews() {
+    try {
+        const client = await pool.connect();
+        const { rows } = await client.query('SELECT * FROM review');
+        rows.forEach((row) => {
+            redisClient.set(`review:${row.id}`, JSON.stringify(row), 'EX', 60);
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+app.get('/api/shoes', async (req, res) => {
+    try {
+        const cachedData = await redisClient.get('allShoesData');
+        if (cachedData) {
+            return res.status(200).send(JSON.parse(cachedData));
         } else {
-            const stuff = result.rows;
-            res.status(200).send(stuff);
+            const data = await pool.query('SELECT * FROM shoes');
+            redisClient.set('allShoesData', JSON.stringify(data.rows), 'EX', 60);
+            return res.status(200).send(data.rows);
         }
-    })
-})
+    } catch (error) {
+        console.log(error);
+        return res.status(404).send(error);
+    }
+});
 
-app.get('/api/shoes/:id', (req, res, next) =>{
-    const id = Number.parseInt(req.params.id);
-    pool.query('SELECT * FROM shoes WHERE id=$1', [id], (err, result) => {
-        if (err){
-            res.status(404).send(err);
+app.get('/api/review/:id', async (req, res) => {
+    try {
+        const cachedData = await redisClient.get(`review:${req.params.id}`);
+
+        if (cachedData) {
+            return res.status(200).send(JSON.parse(cachedData));
         } else {
-            const shoe = result.rows;
-            res.status(200).send(shoe);
+            const { rows } = await pool.query('SELECT * FROM review WHERE review_id=$1', [req.params.id]);
+            if (rows.length === 0) {
+                return res.status(404).send("Review not found");
+            } else {
+                const review = rows[0];
+                redisClient.set(`review:${req.params.id}`, JSON.stringify(review), 'EX', 60);
+                return res.status(200).send(review);
+            }
         }
-    })
-})
-
-app.get('/api/shoeid/:id', (req, res, next) =>{
-    const id = Number.parseInt(req.params.id);
-    pool.query('SELECT * FROM shoes WHERE shoeid=$1', [id], (err, result) => {
-        if (err){
-            res.status(404).send(err);
-        } else {
-            const shoe = result.rows;
-            res.status(200).send(shoe);
-        }
-    })
-})
-
-
-//Query provides an extra column on return of query, column 'shoes_name' which is pulled from parent table 'shoes'
-app.get('/api/review', (req, res, next) => {
-    pool.query('SELECT review.*, shoes.name AS shoes_name FROM review INNER JOIN shoes ON review.review_id = shoes.id;', (err, result) => {
-        if (err) {
-            res.status(404).send(err);
-        } else {
-            const reviews = result.rows;
-            res.status(200).send(reviews); 
-        }
-    })
-})
-
-app.get('/api/review/:id', (req, res, next) => {
-    const id = Number.parseInt(req.params.id);
-
-    pool.query('SELECT * FROM review WHERE review_id=$1', [id], (err, result) => {
-        if (err){
-            res.status(404).send(err)
-        } else {
-            const review = result.rows;
-            res.status(200).send(review);
-        }
-    })
-})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+});
 
 app.get('/api/:word', (req, res, next) => {
     const word = req.params.word;
-    res.status(405).send(`NOT FOUND!! - 405 ERROR - /api/${word}/ DOES NOT EXIST`)
-})
+    res.status(405).send(`NOT FOUND!! - 405 ERROR - /api/${word}/ DOES NOT EXIST`);
+});
 
-app.post('/api/shoes/', (req, res) => {
-    const name = req.body.name;
-    const price = req.body.price;
-    const gender = req.body.gender;
-    const image = req.body.image;
-    const image_array = req.body.image_array;
-    const description = req.body.description;
-    const color_description = req.body.color_description;
-    const style = req.body.style;
-    const size_array = req.body.size_array;
+app.post('/api/shoes/', async (req, res) => {
+    const { name, price, gender, image, image_array, description, color_description, style, size_array } = req.body;
 
-    if (!name || !price || !gender || !image || !image_array || !description || !color_description || !style || !size_array){
-        return res.status(407).send("Error in post data or insufficient data provided for post route shoes")
+    if (!name || !price || !gender || !image || !image_array || !description || !color_description || !style || !size_array) {
+        return res.status(407).send("Error in post data or insufficient data provided for post route shoes");
     }
 
-    pool.query('INSERT INTO shoes (name, price, gender, image, image_array, description, color_description, style, size_array) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING*;', [name, price, gender, image, image_array, description, color_description, style, size_array], (err, result) => {
-        if (err) {
-            res.status(409).send(err);
-        } else {
-            const shoeInfo = result.rows[0];
-            res.status(202).send(shoeInfo)
-        }
-    })
-})
+    try {
+        const { rows } = await pool.query(
+            'INSERT INTO shoes (name, price, gender, image, image_array, description, color_description, style, size_array) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;',
+            [name, price, gender, image, image_array, description, color_description, style, size_array]
+        );
+        const shoeInfo = rows[0];
+        redisClient.del('allShoesData');
+        return res.status(202).send(shoeInfo);
+    } catch (error) {
+        console.log(error);
+        return res.status(409).send(error);
+    }
+});
 
-app.post('/api/review/', (req, res) => {
-    const review_id = req.body.review_id;
-    const title = req.body.title;
-    const stars = req.body.stars;
-    const user_name = req.body.user_name;
-    const date_created = req.body.date_created;
-    const summary = req.body.summary;
+app.post('/api/review/', async (req, res) => {
+    const { review_id, title, stars, user_name, date_created, summary, likes, dislikes } = req.body;
 
-    if (!review_id || !title || !stars || !user_name || !date_created || !summary){
-        return res.status(408).send("Error in post data or insufficient data provided for post route review")
+    if (!review_id || !title || !stars || !user_name || !date_created || !summary || !likes || !dislikes) {
+        return res.status(407).send("Error in post data or insufficient data provided for post route review");
     }
 
-    pool.query('INSERT INTO review (review_id, title, stars, user_name, date_created, summary) VALUES ($1, $2, $3, $4, $5, $6) RETURNING*;', [review_id, title, stars, user_name, date_created, summary], (err, result) => {
-        if (err) {
-            res.status(410).send(err);
-        } else {
-            const reviewInfo = result.rows[0];
-            res.status(203).send(reviewInfo);
-        }
-    })
-})
+    try {
+        const { rows } = await pool.query(
+            'INSERT INTO review (review_id, title, stars, user_name, date_created, summary, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;',
+            [review_id, title, stars, user_name, date_created, summary, likes, dislikes]
+        );
+        const reviewInfo = rows[0];
+        redisClient.del(`review:${review_id}`);
+        return res.status(202).send(reviewInfo);
+    } catch (error) {
+        console.log(error);
+        return res.status(409).send(error);
+    }
+});
 
 
 //DELETE ROUTES (x2) - NOT NECESSARY
 //PATCH ROUTES (x2) - NOT NECESSARY
+async function startup() {
+    // Cache all data in Redis
+    await cacheAllData();
+    await cacheAllReviews();
 
-app.listen(3000, () => {
-    console.log('Server listening on port 3000')
-})
+    app.listen(3000, () => {
+        console.log('Server listening on port 3000')
+    })
+}
+
+startup();
