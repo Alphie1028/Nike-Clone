@@ -76,6 +76,30 @@ app.get('/api/shoes/:id', (req, res, next) => {
         }
     });
 });
+app.get('/api/shoeid/:id', (req, res, next) => {
+    const id = Number.parseInt(req.params.id);
+    client.get(`shoeid:${id}`, (err, result) => {
+        if (err) {
+            res.status(404).send(err);
+        } else if (result) {
+            const shoe = JSON.parse(result);
+            res.status(200).send(shoe);
+        } else {
+            const redisClient = redis.createClient({ host: 'redis', port: 6379 });
+            pool.query('SELECT * FROM shoes WHERE shoeid=$1', [id], (err, result) => {
+                if (err) {
+                    res.status(404).send(err);
+                } else {
+                    const shoe = result.rows;
+                    redisClient.setex(`shoeid:${id}`, 3600, JSON.stringify(shoe));
+                    redisClient.quit();
+                    res.status(200).send(shoe);
+                }
+            });
+        }
+    });
+});
+
 app.get('/api/review', (req, res, next) => {
     client.get('review', (err, result) => {
         if (err) {
