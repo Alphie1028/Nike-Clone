@@ -1,9 +1,33 @@
 version: '3'
 services:
-  express:
+  express-1:
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
+    volumes:
+      - .:/express
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/mydb
+      - REDIS_HOST=redis
+  express-2:
+    build: .
+    ports:
+      - "3002:3000"
+    volumes:
+      - .:/express
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/mydb
+      - REDIS_HOST=redis
+  express-3:
+    build: .
+    ports:
+      - "3003:3000"
     volumes:
       - .:/express
     depends_on:
@@ -44,6 +68,18 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=password
       - PGADMIN_LISTEN_PORT=80
       - PGADMIN_SKIP_NATIVE_AUTH=true
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - express-1
+      - express-2
+      - express-3
 
 volumes:
   db-data:
+
