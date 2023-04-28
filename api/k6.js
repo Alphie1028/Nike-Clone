@@ -5,8 +5,8 @@ import { check, sleep, group, fail } from 'k6';
 export const options = {
 
     stages: [
-        { duration: '15s', target: 1150 },
-        { duration: '30s', target: 1150 },
+        { duration: '15s', target: 10150 },
+        { duration: '30s', target: 10150 },
         { duration: '15s', target: 0 },
     ],
 
